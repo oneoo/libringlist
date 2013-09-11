@@ -11,6 +11,12 @@
 #include "ringlist.h"
 
 
+int cmp(rl_node_t *n, void *d)
+{
+    if(n->ptr == d)return 1;
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     rl_t *rl = rl_create(10);
@@ -39,6 +45,14 @@ int main(int argc, char *argv[])
         printf("%ld\n", (long)n->ptr);
         n = n->next;
     }
+
+    n = rl_find(rl, 0, cmp, (void*)102);
+    if(n) {
+        printf("found: %ld\n", (long)n->ptr);
+    }
+
+    rl_destory(rl);
+    rl = NULL;
 
     return 0;
 }

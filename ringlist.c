@@ -23,17 +23,17 @@ uint32_t fnv1_32 ( const char *data, uint32_t len )
 
 void *rl_create(uint32_t n)
 {
-    if(n<1){
+    if(n<1) {
         return NULL;
     }
 
     void *rt = malloc(sizeof(uint32_t)+sizeof(uint32_t)+n*2*sizeof(void*));
-    
+
     if(rt) {
         memcpy(rt, &n, sizeof(uint32_t));
         memset(rt+sizeof(uint32_t), 0, sizeof(uint32_t)+n*2*sizeof(void*));
     }
-    
+
     return rt;
 }
 
@@ -55,7 +55,7 @@ rl_node_t *rl_add(rl_t *rl, uint32_t k)
     rln->_k = (k%*r);
 
     void **l = rl+sizeof(uint32_t)+*r*sizeof(void*)+sizeof(uint32_t)+(k%*r)*sizeof(void*); // last
-    
+
     if(*l) {
         rl_node_t *n = (rl_node_t*)*l;
         n->next = rln;
@@ -63,7 +63,7 @@ rl_node_t *rl_add(rl_t *rl, uint32_t k)
         *l = rln;
     } else {
         void **f = rl+sizeof(uint32_t)+sizeof(uint32_t)+(k%*r)*sizeof(void*); // first
-        
+
         *f = rln;
         *l = rln;
     }
@@ -73,7 +73,7 @@ rl_node_t *rl_add(rl_t *rl, uint32_t k)
 
 void rl_del(rl_t *rl, rl_node_t *n)
 {
-    if(!n){
+    if(!n) {
         return;
     }
 
@@ -109,7 +109,7 @@ rl_node_t *rl_each(rl_t* rl, uint32_t k)
         __rl_p = NULL;
         uint32_t *r = rl;
         void **f = rl+sizeof(uint32_t)+sizeof(uint32_t)+(k%*r)*sizeof(void*); // first
-        
+
         if(*f) {
             __rl_p = *f;
         }
@@ -138,7 +138,7 @@ void *rl_shift(rl_t *rl, uint32_t k)
 {
     uint32_t *r = rl;
     void **l = rl+sizeof(uint32_t)+sizeof(uint32_t)+*r*sizeof(void*)+(k%*r)*sizeof(void*); // last
-    
+
     if(*l) {
         void *ptr = ((rl_node_t*)*l)->ptr;
         rl_del(rl, *l);
@@ -146,4 +146,38 @@ void *rl_shift(rl_t *rl, uint32_t k)
     }
 
     return NULL;
+}
+
+rl_node_t *rl_find(rl_t *rl, uint32_t k, rl_cmp_h *f, void *d)
+{
+    rl_node_t *n = rl_each(rl, k);
+    while(n) {
+        if(f(n, d)) {
+            return n;
+        }
+        n = n->next;
+    }
+
+    return NULL;
+}
+
+void rl_destory(rl_t *rl)
+{
+    uint32_t *r = rl;
+    uint32_t i = 0;
+
+    void **f = NULL;
+    rl_node_t *n = NULL, *d = NULL;
+
+    for(i=0; i<*r; i++) {
+        f = rl+sizeof(uint32_t)+sizeof(uint32_t)+(i%*r)*sizeof(void*); // first
+        n = *f;
+        while(n) {
+            d = n;
+            n = n->next;
+            free(d);
+        }
+    }
+
+    free(rl);
 }

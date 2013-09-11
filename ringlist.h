@@ -31,5 +31,8 @@ void rl_del(rl_t *rl, rl_node_t *n);
 rl_node_t *rl_each(rl_t* rl, uint32_t k);
 void *rl_pop(rl_t *rl, uint32_t k);
 void *rl_shift(rl_t *rl, uint32_t k);
+typedef int rl_cmp_h(rl_node_t *n, void *d);
+rl_node_t *rl_find(rl_t *rl, uint32_t k, rl_cmp_h *f, void *d);
+void rl_destory(rl_t *rl);
 
 #endif
